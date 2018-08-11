@@ -21,21 +21,21 @@ class CommandRegistrar
 	/**
 	 * Fetch the given command
 	 */
-	public fetch(name: string): Function {
+	public fetch(name: string) {
 		return this.__commands[name];
 	}
 
 	/**
 	 * Check if the command exists
 	 */
-	public has (name: string): boolean {
+	public has (name: string) {
 		return Boolean(this.__commands[name]);
 	}
 
 	/**
 	 * Invoke the given command
 	 */
-	public invoke(command: Command): CommandRegistrar {
+	public invoke(command: Command) {
 		console.log("Invoking the method...");
 		if (!this.has(command.name))
 			throw new Error(`Command Invocation Error: '${command.name}' not found`);
@@ -47,7 +47,7 @@ class CommandRegistrar
 	/**
 	 * Register a new command
 	 */
-	public register (name: string, callback: Function): CommandRegistrar {
+	public register (name: string, callback: Function) {
 		if (this.has(name))
 			throw new Error(`Command Registration Error: '${name}' has already been registered`);
 		this.__commands[name] = callback;
@@ -57,7 +57,7 @@ class CommandRegistrar
 	/**
 	 * Register a set of commands at once
 	 */
-	public registerAll (commands: CommandMap): CommandRegistrar {
+	public registerAll (commands: CommandMap) {
 		for (var name in commands)
 			this.register(name, commands[name]);
 		return this;
