@@ -5,7 +5,10 @@
   "main": "lib/index",
   "types": "lib/index",
   "directories": {
-    "lib": "lib"
+    "doc": "doc",
+    "example": "example",
+    "lib": "lib",
+    "test": "test"
   },
   "dependencies": {
     "discord.js": "^11.4.0",

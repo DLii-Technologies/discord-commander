@@ -1,46 +1,161 @@
-import { Client, Message } from "discord.js";
-import Command             from "./command";
-import CommandRegistrar    from "./command_registrar";
+import { Client, Message }             from "discord.js";
+import { CommandMap, CommandCallback } from "./interfaces/command_map";
+import Command                         from "./command";
+import EventMap                        from "./interfaces/event_map";
 
-class DiscordCommander extends Client
+class DiscordCommander
 {
+	/**
+	 * A list of all the events to listen for
+	 */
+	protected events: EventMap = {
+		message: this.onMessage
+	};
+
+	/**
+	 * Store any active listeners
+	 */
+	protected eventListeners: EventMap = {};
+
+	/**
+	 * An instance of the Discord bot client
+	 */
+	private __bot: Client | undefined = undefined;
+
+	/**
+	 * The list of registered commands
+	 */
+	private __commands: CommandMap = {};
+
 	/**
 	 * The command prefix
 	 */
-	public commandPrefix = '!';
+	private __prefix: string = '!';
 
 	/**
-	 * The Registrar stores each of the registered command modules
+	 * Create a new DiscordCommander
 	 */
-	private __registrar: CommandRegistrar;
+	public constructor (bot?: Client) {
+		this.bot = bot;
+	}
 
 	/**
-	 * The client ID for the Discord bot
+	 * Invoke the given command
 	 */
-	private __clientId: string;
-
-	/**
-	 * Create a new DiscordCommander Discord bot
-	 */
-	public constructor (clientId: string){
-		super();
-		this.__clientId  = clientId;
-		this.__registrar = new CommandRegistrar();
+	protected invoke (command: Command) {
+		this.__commands[command.name](command);
 	}
 
 	/**
 	 * Register the event listeners
 	 */
 	protected registerListeners () {
-		this.on("message", this.onMessage);
+		if (this.bot) {
+			for (var event in this.events) {
+				this.eventListeners[event] = (...args: any[]) => {
+					this.events[event].apply(this, args);
+				}
+				this.bot.on(event, this.eventListeners[event]);
+			}
+		}
 	}
 
 	/**
-	 * Start the bot
+	 * Unregister the event listeners
 	 */
-	public boot () {
-		this.registerListeners();
-		this.login(this.__clientId);
+	protected unregisterListeners () {
+		if (this.bot) {
+			for (var event in this.events) {
+				this.bot.off(event, this.eventListeners[event]);
+				delete this.eventListeners[event];
+			}
+		}
+	}
+
+	/**
+	 * Register a command
+	 */
+	protected registerCommand (name: string, callback: CommandCallback, context?: any) {
+		if (this.has(name))
+			throw new Error(`Command Registration Error: '${name}' has already been registered`);
+		if (context) {
+			this.__commands[name] = (...args: any[]) => {
+
+				callback.apply(context, args);
+			};
+		} else {
+			this.__commands[name] = callback;
+		}
+	}
+
+	/**
+	 * Unregister a command
+	 */
+	protected unregisterCommand (name: string, callback: CommandCallback) {
+		if (this.has(name)) {
+			delete this.__commands[name];
+		}
+	}
+
+	// Public Methods ------------------------------------------------------------------------------
+
+	/**
+	 * Check if the command has been registered
+	 */
+	public has (name: string) {
+		return Boolean(this.__commands[name]);
+	}
+
+	/**
+	 * Register multiple commands at a time using a Commandmap
+	 */
+	public register (map: CommandMap): DiscordCommander;
+
+	/**
+	 * Register a single command given the name and callback
+	 */
+	public register (name: string, callback: CommandCallback, context?: any): DiscordCommander;
+
+	/**
+	 * Register a command
+	 */
+	public register (a: CommandMap | string, b?: CommandCallback, context?: any) {
+		if (typeof a == "string") {
+			if (!b)
+				throw new Error(`Command Registration Error: '${a}' has no callback`);
+			this.registerCommand(a, b, context);
+		} else {
+			for (let name in a) {
+				this.registerCommand(name, a[name]);
+			}
+		}
+		return this;
+	}
+
+	/**
+	 * Register multiple commands at a time using a Commandmap
+	 */
+	public unregister (map: CommandMap): DiscordCommander;
+
+	/**
+	 * Register a single command given the name and callback
+	 */
+	public unregister (name: string, callback: CommandCallback): DiscordCommander;
+
+	/**
+	 * Register a command
+	 */
+	public unregister (a: CommandMap | string, b?: CommandCallback) {
+		if (typeof a == "string") {
+			if (!b)
+				throw new Error(`Command Registration Error: '${a}' has no callback`);
+			this.unregisterCommand(a, b);
+		} else {
+			for (let name in a) {
+				this.unregisterCommand(name, a[name]);
+			}
+		}
+		return this;
 	}
 
 	// Event Handlers ------------------------------------------------------------------------------
@@ -49,24 +164,47 @@ class DiscordCommander extends Client
 	 * Invoked when a message is received from Discord
 	 */
 	protected onMessage (message: Message) {
-		var name: string = message.content.split(' ')[0];
-		if (name.startsWith(this.commandPrefix) && name.length > this.commandPrefix.length) {
-			// Shave off the prefix
-			if (this.__registrar.has(name.substr(this.commandPrefix.length))) {
-				this.__registrar.invoke(
-					new Command(message.content.substr(this.commandPrefix.length))
-				);
+		if (message.content.startsWith(this.prefix)) {
+			var cmd = new Command(this.prefix, message.content);
+			if (cmd.isValid) {
+				this.invoke(cmd);
 			}
 		}
 	}
 
-	// Accessors -----------------------------------------------------------------------------------
+	// Properties ----------------------------------------------------------------------------------
 
 	/**
-	 * Get the command registrar
+	 * Get the current Discord bot client instance
 	 */
-	get commandRegistrar () {
-		return this.__registrar;
+	public get bot () {
+		return this.__bot;
+	}
+
+	/**
+	 * Set the current Discord bot client instance
+	 */
+	public set bot (bot: Client | undefined) {
+		this.unregisterListeners();
+		this.__bot = bot;
+		this.registerListeners();
+	}
+
+	/**
+	 * Get the command prefix
+	 */
+	public get prefix () {
+		return this.__prefix;
+	}
+
+	/**
+	 * Set the command prefix
+	 */
+	public set prefix (prefix: string) {
+		prefix = prefix.trim();
+		if (prefix.length == 0)
+			throw new Error("Set Command Prefix Error: Prefix cannot be empty");
+		this.__prefix = prefix;
 	}
 }
 

@@ -1,32 +1,66 @@
 class Command
 {
 	/**
-	 * The name of the command
+	 * Store the raw argument string
+	 */
+	private __argString: string = "";
+
+	/**
+	 * Store the original command string
+	 */
+	private __commandString: string;
+
+	/**
+	 * The validity of the command state
+	 */
+	private __isValid: boolean = true;
+
+	/**
+	 * The name of the command invoked
 	 */
 	private __name: string = "";
 
 	/**
-	 * The original command string
+	 * Create a new command instance
 	 */
-	private __cmdString: string;
-
-	/**
-	 * Create a new command
-	 */
-	constructor (command: string) {
-		this.__cmdString = command.trim();
-		this.initName(this.__cmdString);
+	constructor (prefix: string, commandString: string) {
+		this.__commandString = commandString.trim();
+		this.evaluate(prefix);
 	}
 
 	/**
-	 * Set the name given the command string
+	 * Evaluate the command string given the command prefix
 	 */
-	protected initName (cmdString: string) {
-		var index = this.__cmdString.indexOf(' ');
-		if (index == -1)
-			this.__name = cmdString;
-		else
-			this.__name = cmdString.substr(0, index);
+	protected evaluate (prefix: string) {
+		var command: string = this.__commandString.split(" ")[0];
+		if (command.startsWith(prefix) && command.length > prefix.length) {
+			var name: string = command.substr(prefix.length);
+			this.__name      = command.substr(prefix.length);
+			this.__argString = this.__commandString.substr(command.length).trim();
+		} else {
+			this.__isValid = false;
+		}
+	}
+
+	/**
+	 * Get the argument string
+	 */
+	public get argString () {
+		return this.__argString;
+	}
+
+	/**
+	 * Get the original command string
+	 */
+	public get commandString () {
+		return this.__argString;
+	}
+
+	/**
+	 * Check if the command is in a valid state
+	 */
+	public get isValid () {
+		return this.__isValid;
 	}
 
 	/**

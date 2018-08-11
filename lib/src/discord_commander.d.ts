@@ -1,37 +1,40 @@
 import { Client, Message } from "discord.js";
-import CommandRegistrar from "./command_registrar";
-declare class DiscordCommander extends Client {
+import EventMap from "./interfaces/event_map";
+declare class DiscordCommander {
     /**
      * The command prefix
      */
     commandPrefix: string;
     /**
-     * The Registrar stores each of the registered command modules
+     * A list of all the events to listen for
      */
-    private __registrar;
+    protected events: EventMap;
     /**
-     * The client ID for the Discord bot
+     * An instance of the Discord bot client
      */
-    private __clientId;
+    private __bot;
     /**
-     * Create a new DiscordCommander Discord bot
+     * Create a new DiscordCommander
      */
-    constructor(clientId: string);
+    constructor(bot: Client | null);
     /**
      * Register the event listeners
      */
     protected registerListeners(): void;
     /**
-     * Start the bot
+     * Unregister the event listeners
      */
-    boot(): void;
+    protected unregisterListeners(): void;
     /**
      * Invoked when a message is received from Discord
      */
     protected onMessage(message: Message): void;
     /**
-     * Get the command registrar
+     * Get the current Discord bot client instance
      */
-    readonly commandRegistrar: CommandRegistrar;
+    /**
+    * Set the current Discord bot client instance
+    */
+    bot: Client | null;
 }
 export default DiscordCommander;

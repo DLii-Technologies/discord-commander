@@ -1,7 +1,10 @@
+import * as DC    from "../index";
+import { Client } from "discord.js";
 import { config } from "dotenv";
 import { expect } from "chai";
 import "mocha";
-import { createBot, registerCommands } from "./create_bot";
+
+// Initialization ----------------------------------------------------------------------------------
 
 /**
  * Configure the environment using 'dotenv'
@@ -23,15 +26,12 @@ describe("Client ID", () => {
 	});
 });
 
+// Discord Initialization --------------------------------------------------------------------------
+
 /**
  * Create a new bot instance
  */
-var bot = createBot(CLIENT_ID);
-
-/**
- * Register the commands on the bot
- */
-registerCommands(bot);
+var bot = new Client();
 
 /**
  * Boot up the bot
@@ -41,7 +41,37 @@ describe("Bot Bootup", () => {
 		bot.on("ready", () => {
 			done();
 		});
-		bot.boot();
+		bot.login(CLIENT_ID);
 	}).timeout(10000);
 });
 
+// Discord Commander -------------------------------------------------------------------------------
+
+/**
+ * Create the Discord Commander
+ */
+var commander = new DC.DiscordCommander(bot);
+
+class CallbackTest
+{
+	/**
+	 * This should be accessible
+	 */
+	private __testVar = 15;
+
+	/**
+	 * A test callback function to register
+	 */
+	public test (command?: DC.Command) {
+		console.log(this);
+		console.log(this.__testVar);
+	}
+}
+
+var ct = new CallbackTest();
+
+
+/**
+ * Register a command
+ */
+commander.register("test", ct.test, ct);
