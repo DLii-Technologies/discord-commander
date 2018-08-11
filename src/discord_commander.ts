@@ -1,8 +1,8 @@
-import Discord          from "discord.js";
-import Command          from "./command";
-import CommandRegistrar from "./command_registrar";
+import { Client, Message } from "discord.js";
+import Command             from "./command";
+import CommandRegistrar    from "./command_registrar";
 
-class DiscordCommander extends Discord.Client
+class DiscordCommander extends Client
 {
 	/**
 	 * The command prefix
@@ -48,7 +48,7 @@ class DiscordCommander extends Discord.Client
 	/**
 	 * Invoked when a message is received from Discord
 	 */
-	protected onMessage (message: Discord.Message) {
+	protected onMessage (message: Message) {
 		var name: string = message.content.split(' ')[0];
 		if (name.startsWith(this.commandPrefix) && name.length > this.commandPrefix.length) {
 			// Shave off the prefix
