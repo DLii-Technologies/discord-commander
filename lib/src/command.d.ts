@@ -1,23 +1,25 @@
+import CommandInvocation from "./command_invocation";
+import { CommandCallback } from "./common";
 declare class Command {
+    /**
+     * The callback function/method
+     */
+    __callback: CommandCallback;
+    /**
+     * The context of the callback
+     */
+    __context: any;
     /**
      * The name of the command
      */
-    private __name;
-    /**
-     * The original command string
-     */
-    private __cmdString;
+    __name: string;
     /**
      * Create a new command
      */
-    constructor(command: string);
+    constructor(name: string, callback: CommandCallback, context?: any);
     /**
-     * Set the name given the command string
+     * Invoke the command
      */
-    protected initName(cmdString: string): void;
-    /**
-     * Get the name of the command
-     */
-    readonly name: string;
+    invoke(args: CommandInvocation): void;
 }
 export default Command;

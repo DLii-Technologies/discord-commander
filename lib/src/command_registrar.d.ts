@@ -1,36 +1,51 @@
-import CommandMap from "./interfaces/command_map";
-import Command from "./command";
+import * as Common from "./common";
 /**
- * The class keeps track of all commands
+ * A simple command registration system
  */
 declare class CommandRegistrar {
     /**
-     * The list of commands
+     * The context of the commands to register
      */
-    __commands: CommandMap;
+    __context: any;
     /**
-     * Create a new command registrar
+     * The list of registered commands
      */
-    constructor();
+    private __commands;
     /**
-     * Fetch the given command
+     * Create a new registrar
      */
-    fetch(name: string): Function;
+    constructor(commands: Common.ICommandMap, context: any);
     /**
-     * Check if the command exists
+     * Register a command
      */
-    has(name: string): boolean;
+    protected registerCommand(name: string, callback?: Common.CommandCallback, context?: any): void;
     /**
-     * Invoke the given command
+     * Register a set of commands
      */
-    invoke(command: Command): CommandRegistrar;
+    protected registerCommands(commands: Common.ICommandDefinitions, context?: any): void;
     /**
-     * Register a new command
+     * Register the commands within a module
      */
-    register(name: string, callback: Function): CommandRegistrar;
+    protected registerModule(commandModule: Common.ICommandRegistrar): void;
     /**
-     * Register a set of commands at once
+     * Register a list of modules
      */
-    registerAll(commands: CommandMap): CommandRegistrar;
+    protected registerModules(commandModules: Common.ICommandRegistrar[]): void;
+    /**
+     * Register a command module
+     */
+    register(module: Common.ICommandRegistrar): CommandRegistrar;
+    /**
+     * Register a list of command modules
+     */
+    register(modules: Common.ICommandRegistrar[]): CommandRegistrar;
+    /**
+     * Register multiple commands at a time using a Commandmap
+     */
+    register(map: Common.ICommandDefinitions, context?: any): CommandRegistrar;
+    /**
+     * Register a single command given the name and callback
+     */
+    register(name: string, callback: Common.CommandCallback, context?: any): CommandRegistrar;
 }
 export default CommandRegistrar;

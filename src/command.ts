@@ -1,4 +1,4 @@
-import CommandArgs         from "./command_args";
+import CommandInvocation   from "./command_invocation";
 import { CommandCallback } from "./common";
 
 class Command
@@ -30,7 +30,7 @@ class Command
 	/**
 	 * Invoke the command
 	 */
-	public invoke (args: CommandArgs) {
+	public invoke (args: CommandInvocation) {
 		this.__callback.apply(args, this.__context);
 	}
 }

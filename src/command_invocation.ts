@@ -1,4 +1,6 @@
-class CommandArgs
+import { GuildMember } from "discord.js";
+
+class CommandInvocation
 {
 	/**
 	 * Store the raw argument string
@@ -21,10 +23,16 @@ class CommandArgs
 	private __name: string = "";
 
 	/**
+	 * The member who created the invocation
+	 */
+	private __member: GuildMember;
+
+	/**
 	 * Create a new command instance
 	 */
-	constructor (prefix: string, commandString: string) {
+	constructor (prefix: string, commandString: string, member: GuildMember) {
 		this.__commandString = commandString.trim();
+		this.__member        = member;
 		this.evaluate(prefix);
 	}
 
@@ -71,4 +79,4 @@ class CommandArgs
 	}
 }
 
-export default CommandArgs;
+export default CommandInvocation;

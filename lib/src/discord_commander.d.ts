@@ -1,14 +1,15 @@
 import { Client, Message } from "discord.js";
-import EventMap from "./interfaces/event_map";
-declare class DiscordCommander {
-    /**
-     * The command prefix
-     */
-    commandPrefix: string;
+import CommandManager from "./command_manager";
+import { IEventMap } from "./common";
+declare class DiscordCommander extends CommandManager {
     /**
      * A list of all the events to listen for
      */
-    protected events: EventMap;
+    protected events: IEventMap;
+    /**
+     * Store any active listeners
+     */
+    protected eventListeners: IEventMap;
     /**
      * An instance of the Discord bot client
      */
@@ -16,7 +17,7 @@ declare class DiscordCommander {
     /**
      * Create a new DiscordCommander
      */
-    constructor(bot: Client | null);
+    constructor(bot?: Client);
     /**
      * Register the event listeners
      */
@@ -35,6 +36,6 @@ declare class DiscordCommander {
     /**
     * Set the current Discord bot client instance
     */
-    bot: Client | null;
+    bot: Client | undefined;
 }
 export default DiscordCommander;

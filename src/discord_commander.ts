@@ -1,9 +1,9 @@
 import { Client, Message } from "discord.js";
-import CommandArgs         from "./command_args";
-import CommandRegistrar    from "./command_registrar";
+import CommandInvocation   from "./command_invocation";
+import CommandManager      from "./command_manager";
 import { IEventMap }       from "./common";
 
-class DiscordCommander
+class DiscordCommander extends CommandManager
 {
 	/**
 	 * A list of all the events to listen for
@@ -23,21 +23,11 @@ class DiscordCommander
 	private __bot: Client | undefined = undefined;
 
 	/**
-	 * The command prefix
-	 */
-	private __prefix: string = '!';
-
-	/**
-	 * The list of registered commands
-	 */
-	private __registrar: CommandRegistrar;
-
-	/**
 	 * Create a new DiscordCommander
 	 */
 	public constructor (bot?: Client) {
-		this.__registrar = new CommandRegistrar();
-		this.bot         = bot;
+		super();
+		this.bot = bot;
 	}
 
 	/**
@@ -66,34 +56,6 @@ class DiscordCommander
 		}
 	}
 
-	// Public Methods ------------------------------------------------------------------------------
-
-	/**
-	 * Invoke a command with the given arguments
-	 */
-	public invoke (args: CommandArgs) {
-		var cmd = this.__registrar.fetch(args.name);
-		if (cmd) {
-			cmd.invoke(args);
-		}
-	}
-
-	/**
-	 * Check if the command has been registered
-	 */
-	public has (name: string) {
-		return this.__registrar.has(name);
-	}
-
-	/**
-	 * Register a set of commands by using the given command registrar
-	 */
-	public register (callback: (registrar: CommandRegistrar) => void, context?: any) {
-		this.__registrar.context = context;
-		callback(this.__registrar);
-		this.__registrar.context = undefined;
-	}
-
 	// Event Handlers ------------------------------------------------------------------------------
 
 	/**
@@ -101,9 +63,9 @@ class DiscordCommander
 	 */
 	protected onMessage (message: Message) {
 		if (message.content.startsWith(this.prefix)) {
-			var args = new CommandArgs(this.prefix, message.content);
-			if (args.isValid) {
-				this.invoke(args);
+			var invocation = new CommandInvocation(this.prefix, message.content, message.member);
+			if (invocation.isValid) {
+				this.invoke(invocation);
 			}
 		}
 	}
@@ -124,23 +86,6 @@ class DiscordCommander
 		this.unregisterListeners();
 		this.__bot = bot;
 		this.registerListeners();
-	}
-
-	/**
-	 * Get the command prefix
-	 */
-	public get prefix () {
-		return this.__prefix;
-	}
-
-	/**
-	 * Set the command prefix
-	 */
-	public set prefix (prefix: string) {
-		prefix = prefix.trim();
-		if (prefix.length == 0)
-			throw new Error("Set Command Prefix Error: Prefix cannot be empty");
-		this.__prefix = prefix;
 	}
 }
 

@@ -59,14 +59,14 @@ var commander = new DC.DiscordCommander(bot);
 commander.register((registrar: DC.CommandRegistrar) => {
 
 	// Standard callback function registration
-	registrar.register("test", (command: DC.CommandArgs) => { console.log("It works!"); });
+	registrar.register("test", (command: DC.CommandInvocation) => { console.log("It works!"); });
 
 	// Command Module registration
 	registrar.register(new TestCommandModule());
 
 	// Register commands using a CommandDefinition map
 	registrar.register({
-		"testmulti": (cmd: DC.CommandArgs) => {
+		"testmulti": (cmd: DC.CommandInvocation) => {
 			console.log("Test Multi");
 		}
 	});

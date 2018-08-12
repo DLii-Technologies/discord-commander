@@ -1,7 +1,7 @@
-import CommandModule    from "../src/command_module";
-import CommandRegistrar from "../src/command_registrar";
+import { ICommandRegistrar } from "../src/common";
+import CommandRegistrar      from "../src/command_registrar";
 
-class TestCommandModule implements CommandModule
+class TestCommandModule implements ICommandRegistrar
 {
 	public testModVar = false;
 
