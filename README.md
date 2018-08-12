@@ -1,2 +1,6 @@
 # discord-commander
-A Discord bot written in NodeJS that is designed to receive commands via Discord messages
+
+A framework designed to receive and handle commands given by messages from a Discord Bot.
+
+## Example
+

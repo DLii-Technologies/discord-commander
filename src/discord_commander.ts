@@ -1,21 +1,21 @@
-import { Client, Message }             from "discord.js";
-import { CommandMap, CommandCallback } from "./interfaces/command_map";
-import Command                         from "./command";
-import EventMap                        from "./interfaces/event_map";
+import { Client, Message } from "discord.js";
+import CommandArgs         from "./command_args";
+import CommandRegistrar    from "./command_registrar";
+import { IEventMap }       from "./common";
 
 class DiscordCommander
 {
 	/**
 	 * A list of all the events to listen for
 	 */
-	protected events: EventMap = {
+	protected events: IEventMap = {
 		message: this.onMessage
 	};
 
 	/**
 	 * Store any active listeners
 	 */
-	protected eventListeners: EventMap = {};
+	protected eventListeners: IEventMap = {};
 
 	/**
 	 * An instance of the Discord bot client
@@ -23,27 +23,21 @@ class DiscordCommander
 	private __bot: Client | undefined = undefined;
 
 	/**
-	 * The list of registered commands
-	 */
-	private __commands: CommandMap = {};
-
-	/**
 	 * The command prefix
 	 */
 	private __prefix: string = '!';
 
 	/**
+	 * The list of registered commands
+	 */
+	private __registrar: CommandRegistrar;
+
+	/**
 	 * Create a new DiscordCommander
 	 */
 	public constructor (bot?: Client) {
-		this.bot = bot;
-	}
-
-	/**
-	 * Invoke the given command
-	 */
-	protected invoke (command: Command) {
-		this.__commands[command.name](command);
+		this.__registrar = new CommandRegistrar();
+		this.bot         = bot;
 	}
 
 	/**
@@ -72,90 +66,32 @@ class DiscordCommander
 		}
 	}
 
-	/**
-	 * Register a command
-	 */
-	protected registerCommand (name: string, callback: CommandCallback, context?: any) {
-		if (this.has(name))
-			throw new Error(`Command Registration Error: '${name}' has already been registered`);
-		if (context) {
-			this.__commands[name] = (...args: any[]) => {
-
-				callback.apply(context, args);
-			};
-		} else {
-			this.__commands[name] = callback;
-		}
-	}
-
-	/**
-	 * Unregister a command
-	 */
-	protected unregisterCommand (name: string, callback: CommandCallback) {
-		if (this.has(name)) {
-			delete this.__commands[name];
-		}
-	}
-
 	// Public Methods ------------------------------------------------------------------------------
+
+	/**
+	 * Invoke a command with the given arguments
+	 */
+	public invoke (args: CommandArgs) {
+		var cmd = this.__registrar.fetch(args.name);
+		if (cmd) {
+			cmd.invoke(args);
+		}
+	}
 
 	/**
 	 * Check if the command has been registered
 	 */
 	public has (name: string) {
-		return Boolean(this.__commands[name]);
+		return this.__registrar.has(name);
 	}
 
 	/**
-	 * Register multiple commands at a time using a Commandmap
+	 * Register a set of commands by using the given command registrar
 	 */
-	public register (map: CommandMap): DiscordCommander;
-
-	/**
-	 * Register a single command given the name and callback
-	 */
-	public register (name: string, callback: CommandCallback, context?: any): DiscordCommander;
-
-	/**
-	 * Register a command
-	 */
-	public register (a: CommandMap | string, b?: CommandCallback, context?: any) {
-		if (typeof a == "string") {
-			if (!b)
-				throw new Error(`Command Registration Error: '${a}' has no callback`);
-			this.registerCommand(a, b, context);
-		} else {
-			for (let name in a) {
-				this.registerCommand(name, a[name]);
-			}
-		}
-		return this;
-	}
-
-	/**
-	 * Register multiple commands at a time using a Commandmap
-	 */
-	public unregister (map: CommandMap): DiscordCommander;
-
-	/**
-	 * Register a single command given the name and callback
-	 */
-	public unregister (name: string, callback: CommandCallback): DiscordCommander;
-
-	/**
-	 * Register a command
-	 */
-	public unregister (a: CommandMap | string, b?: CommandCallback) {
-		if (typeof a == "string") {
-			if (!b)
-				throw new Error(`Command Registration Error: '${a}' has no callback`);
-			this.unregisterCommand(a, b);
-		} else {
-			for (let name in a) {
-				this.unregisterCommand(name, a[name]);
-			}
-		}
-		return this;
+	public register (callback: (registrar: CommandRegistrar) => void, context?: any) {
+		this.__registrar.context = context;
+		callback(this.__registrar);
+		this.__registrar.context = undefined;
 	}
 
 	// Event Handlers ------------------------------------------------------------------------------
@@ -165,9 +101,9 @@ class DiscordCommander
 	 */
 	protected onMessage (message: Message) {
 		if (message.content.startsWith(this.prefix)) {
-			var cmd = new Command(this.prefix, message.content);
-			if (cmd.isValid) {
-				this.invoke(cmd);
+			var args = new CommandArgs(this.prefix, message.content);
+			if (args.isValid) {
+				this.invoke(args);
 			}
 		}
 	}

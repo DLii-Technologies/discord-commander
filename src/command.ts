@@ -1,73 +1,37 @@
+import CommandArgs         from "./command_args";
+import { CommandCallback } from "./common";
+
 class Command
 {
 	/**
-	 * Store the raw argument string
+	 * The callback function/method
 	 */
-	private __argString: string = "";
+	__callback: CommandCallback;
 
 	/**
-	 * Store the original command string
+	 * The context of the callback
 	 */
-	private __commandString: string;
+	__context: any;
 
 	/**
-	 * The validity of the command state
+	 * The name of the command
 	 */
-	private __isValid: boolean = true;
+	__name: string;
 
 	/**
-	 * The name of the command invoked
+	 * Create a new command
 	 */
-	private __name: string = "";
-
-	/**
-	 * Create a new command instance
-	 */
-	constructor (prefix: string, commandString: string) {
-		this.__commandString = commandString.trim();
-		this.evaluate(prefix);
+	constructor (name: string, callback: CommandCallback, context?: any) {
+		this.__name     = name;
+		this.__callback = callback;
+		this.__context  = context || callback;
 	}
 
 	/**
-	 * Evaluate the command string given the command prefix
+	 * Invoke the command
 	 */
-	protected evaluate (prefix: string) {
-		var command: string = this.__commandString.split(" ")[0];
-		if (command.startsWith(prefix) && command.length > prefix.length) {
-			var name: string = command.substr(prefix.length);
-			this.__name      = command.substr(prefix.length);
-			this.__argString = this.__commandString.substr(command.length).trim();
-		} else {
-			this.__isValid = false;
-		}
-	}
-
-	/**
-	 * Get the argument string
-	 */
-	public get argString () {
-		return this.__argString;
-	}
-
-	/**
-	 * Get the original command string
-	 */
-	public get commandString () {
-		return this.__argString;
-	}
-
-	/**
-	 * Check if the command is in a valid state
-	 */
-	public get isValid () {
-		return this.__isValid;
-	}
-
-	/**
-	 * Get the name of the command
-	 */
-	public get name () {
-		return this.__name;
+	public invoke (args: CommandArgs) {
+		this.__callback.apply(args, this.__context);
 	}
 }
 

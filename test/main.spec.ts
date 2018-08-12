@@ -3,6 +3,7 @@ import { Client } from "discord.js";
 import { config } from "dotenv";
 import { expect } from "chai";
 import "mocha";
+import TestCommandModule from "./command_module";
 
 // Initialization ----------------------------------------------------------------------------------
 
@@ -52,26 +53,21 @@ describe("Bot Bootup", () => {
  */
 var commander = new DC.DiscordCommander(bot);
 
-class CallbackTest
-{
-	/**
-	 * This should be accessible
-	 */
-	private __testVar = 15;
-
-	/**
-	 * A test callback function to register
-	 */
-	public test (command?: DC.Command) {
-		console.log(this);
-		console.log(this.__testVar);
-	}
-}
-
-var ct = new CallbackTest();
-
-
 /**
  * Register a command
  */
-commander.register("test", ct.test, ct);
+commander.register((registrar: DC.CommandRegistrar) => {
+
+	// Standard callback function registration
+	registrar.register("test", (command: DC.CommandArgs) => { console.log("It works!"); });
+
+	// Command Module registration
+	registrar.register(new TestCommandModule());
+
+	// Register commands using a CommandDefinition map
+	registrar.register({
+		"testmulti": (cmd: DC.CommandArgs) => {
+			console.log("Test Multi");
+		}
+	});
+});
