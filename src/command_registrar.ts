@@ -1,5 +1,5 @@
-import Command             from "./command";
-import * as Common         from "./common";
+import Command     from "./command";
+import * as Common from "./common";
 
 /**
  * A simple command registration system
