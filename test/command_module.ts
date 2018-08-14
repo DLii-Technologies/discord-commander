@@ -12,12 +12,7 @@ class TestCommandModule implements ICommandRegistrar
 
 	register (registrar: CommandRegistrar) {
 		console.log("Registered");
-
 		registrar.register("testmod", this.testMod);
-	}
-
-	unregister (registrar: CommandRegistrar) {
-		// registrar.unregister("testmod");
 	}
 }
 

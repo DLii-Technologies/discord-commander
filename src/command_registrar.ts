@@ -9,12 +9,22 @@ class CommandRegistrar
 	/**
 	 * The context of the commands to register
 	 */
-	public __context: any;
+	private __context: any;
 
 	/**
 	 * The list of registered commands
 	 */
 	private __commands: Common.ICommandMap;
+
+	/**
+	 * Authorized roles
+	 */
+	private __rolesAuthorized: string[] = [];
+
+	/**
+	 * Denied roles
+	 */
+	private __rolesBlacklisted: string[] = [];
 
 	/**
 	 * Create a new registrar

@@ -63,8 +63,9 @@ class DiscordCommander extends CommandManager
 	 */
 	protected onMessage (message: Message) {
 		if (message.content.startsWith(this.prefix)) {
-			var invocation = new CommandInvocation(this.prefix, message.content, message.member);
+			var invocation = new CommandInvocation(this.prefix, message);
 			if (invocation.isValid) {
+				console.log(message.member.guild.available);
 				this.invoke(invocation);
 			}
 		}

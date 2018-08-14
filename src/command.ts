@@ -6,7 +6,7 @@ class Command
 	/**
 	 * The callback function/method
 	 */
-	__callback: CommandCallback;
+	__callback: CommandCallback | undefined;
 
 	/**
 	 * The context of the callback
@@ -21,17 +21,37 @@ class Command
 	/**
 	 * Create a new command
 	 */
-	constructor (name: string, callback: CommandCallback, context?: any) {
+	constructor (name: string, callback: CommandCallback | undefined, context?: any) {
 		this.__name     = name;
 		this.__callback = callback;
 		this.__context  = context || callback;
 	}
 
+	// Overridable ---------------------------------------------------------------------------------
+
+	/**
+	 * Determine if the command invocation is authorized
+	 */
+	public authorize (invocation: CommandInvocation): boolean {
+		return true;
+	}
+
+	// Public Methods ------------------------------------------------------------------------------
+
 	/**
 	 * Invoke the command
 	 */
-	public invoke (args: CommandInvocation) {
-		this.__callback.apply(args, this.__context);
+	public invoke (invocation: CommandInvocation): boolean {
+		if (this.__callback)
+			return this.__callback.apply(invocation, this.__context);
+		return true;
+	}
+
+	/**
+	 * Check if the command invocation is authorized
+	 */
+	public isAuthorized (invocation: CommandInvocation) {
+
 	}
 }
 

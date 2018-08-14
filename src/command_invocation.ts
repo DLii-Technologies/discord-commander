@@ -1,4 +1,4 @@
-import { GuildMember } from "discord.js";
+import { GuildMember, Message } from "discord.js";
 
 class CommandInvocation
 {
@@ -30,9 +30,9 @@ class CommandInvocation
 	/**
 	 * Create a new command instance
 	 */
-	constructor (prefix: string, commandString: string, member: GuildMember) {
-		this.__commandString = commandString.trim();
-		this.__member        = member;
+	constructor (prefix: string, message: Message) {
+		this.__commandString = message.content.trim();
+		this.__member        = message.member;
 		this.evaluate(prefix);
 	}
 

@@ -29,8 +29,11 @@ class CommandManager
 	 */
 	public invoke (invocation: CommandInvocation) {
 		if (this.has(invocation.name)) {
-			this.__commands[invocation.name].invoke(invocation);
+			let cmd = this.__commands[invocation.name];
+			if (cmd.isAuthorized(invocation))
+				return this.__commands[invocation.name].invoke(invocation);
 		}
+		return false;
 	}
 
 	/**
