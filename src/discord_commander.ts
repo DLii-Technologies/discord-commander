@@ -1,72 +1,96 @@
-import { Client, Message } from "discord.js";
-import CommandInvocation   from "./command_invocation";
-import CommandManager      from "./command_manager";
-import { IEventMap }       from "./common";
+import { Client, Message }        from "discord.js";
+import CommandInvocation          from "./command_invocation";
+import Registrar                  from "./registrar";
+import { CommandInvocationError } from "./error";
+import * as Common                from "./common";
 
-class DiscordCommander extends CommandManager
+/**
+ * A Discord bot with a command handler built in
+ */
+class DiscordCommander extends Client
 {
 	/**
 	 * A list of all the events to listen for
 	 */
-	protected events: IEventMap = {
+	protected events: Common.IEventMap = {
 		message: this.onMessage
 	};
 
 	/**
-	 * Store any active listeners
+	 * Store all registered commands
 	 */
-	protected eventListeners: IEventMap = {};
+	__commands: Common.ICommandMap = {};
 
 	/**
-	 * An instance of the Discord bot client
+	 * The prefix for commands
 	 */
-	private __bot: Client | undefined = undefined;
+	__prefix = '!';
 
 	/**
 	 * Create a new DiscordCommander
 	 */
-	public constructor (bot?: Client) {
+	public constructor () {
 		super();
-		this.bot = bot;
+		this.registerListeners();
 	}
 
 	/**
 	 * Register the event listeners
 	 */
 	protected registerListeners () {
-		if (this.bot) {
-			for (var event in this.events) {
-				this.eventListeners[event] = (...args: any[]) => {
-					this.events[event].apply(this, args);
-				}
-				this.bot.on(event, this.eventListeners[event]);
-			}
+		for (var event in this.events) {
+			this.on(event, (...args: any[]) => {
+				this.events[event].apply(this, args);
+			});
+		}
+	}
+
+	// Public Methods ------------------------------------------------------------------------------
+
+	/**
+	 * Check if a command is defined
+	 */
+	public has (name: string) {
+		return Boolean(this.__commands[name]);
+	}
+
+	/**
+	 * Invoke a command with the given arguments
+	 */
+	public invoke (invocation: CommandInvocation) {
+		if (this.has(invocation.command)) {
+			this.__commands[invocation.command].invoke(invocation);
 		}
 	}
 
 	/**
-	 * Unregister the event listeners
+	 * Register some new commands
 	 */
-	protected unregisterListeners () {
-		if (this.bot) {
-			for (var event in this.events) {
-				this.bot.off(event, this.eventListeners[event]);
-				delete this.eventListeners[event];
-			}
-		}
+	public register (callback: Common.RegistrationCallback, context?: any) {
+		callback(new Registrar(this.__commands, context));
 	}
 
 	// Event Handlers ------------------------------------------------------------------------------
+
+	/**
+	 * Handle a command message
+	 */
+	protected handle (message: Message) {
+		var invocation = new CommandInvocation(this.prefix, message);
+		this.invoke(invocation);
+	}
 
 	/**
 	 * Invoked when a message is received from Discord
 	 */
 	protected onMessage (message: Message) {
 		if (message.content.startsWith(this.prefix)) {
-			var invocation = new CommandInvocation(this.prefix, message);
-			if (invocation.isValid) {
-				console.log(message.member.guild.available);
-				this.invoke(invocation);
+			try {
+				this.handle(message);
+			} catch (e) {
+				if (e !instanceof CommandInvocationError) {
+					console.error(e);
+				}
 			}
 		}
 	}
@@ -74,19 +98,20 @@ class DiscordCommander extends CommandManager
 	// Properties ----------------------------------------------------------------------------------
 
 	/**
-	 * Get the current Discord bot client instance
+	 * Get the command prefix
 	 */
-	public get bot () {
-		return this.__bot;
+	public get prefix () {
+		return this.__prefix;
 	}
 
 	/**
-	 * Set the current Discord bot client instance
+	 * Set the command prefix
 	 */
-	public set bot (bot: Client | undefined) {
-		this.unregisterListeners();
-		this.__bot = bot;
-		this.registerListeners();
+	public set prefix (prefix: string) {
+		prefix = prefix.trim();
+		if (prefix.length == 0)
+			throw new Error("Set Command Prefix Error: Prefix cannot be empty");
+		this.__prefix = prefix;
 	}
 }
 

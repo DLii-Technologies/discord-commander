@@ -1,7 +1,6 @@
-import { ICommandRegistrar } from "../src/common";
-import CommandRegistrar      from "../src/command_registrar";
+import { Common, Registrar } from "../";
 
-class TestCommandModule implements ICommandRegistrar
+class TestCommandModule implements Common.ICommandRegistrar
 {
 	public testModVar = false;
 
@@ -10,7 +9,7 @@ class TestCommandModule implements ICommandRegistrar
 		console.log("Test module ran!");
 	}
 
-	register (registrar: CommandRegistrar) {
+	register (registrar: Registrar) {
 		console.log("Registered");
 		registrar.register("testmod", this.testMod);
 	}

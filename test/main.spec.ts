@@ -1,9 +1,9 @@
-import * as DC    from "../index";
-import { Client } from "discord.js";
+import * as DC    from "../";
 import { config } from "dotenv";
 import { expect } from "chai";
 import "mocha";
 import TestCommandModule from "./command_module";
+import AuthModule from "./auth_module";
 
 // Initialization ----------------------------------------------------------------------------------
 
@@ -32,7 +32,7 @@ describe("Client ID", () => {
 /**
  * Create a new bot instance
  */
-var bot = new Client();
+var bot = new DC.DiscordCommander();
 
 /**
  * Boot up the bot
@@ -49,14 +49,9 @@ describe("Bot Bootup", () => {
 // Discord Commander -------------------------------------------------------------------------------
 
 /**
- * Create the Discord Commander
- */
-var commander = new DC.DiscordCommander(bot);
-
-/**
  * Register a command
  */
-commander.register((registrar: DC.CommandRegistrar) => {
+bot.register((registrar: DC.Registrar) => {
 
 	// Standard callback function registration
 	registrar.register("test", (command: DC.CommandInvocation) => {
@@ -71,5 +66,21 @@ commander.register((registrar: DC.CommandRegistrar) => {
 		"testmulti": (cmd: DC.CommandInvocation) => {
 			console.log("Test Multi");
 		}
+	});
+
+	// Use a standard closure for authorization
+	registrar.authorize((invocation: DC.CommandInvocation) => {
+		return invocation.hasRole("479049390586331156");
+	}, (registrar: DC.Registrar) => {
+		registrar.register("auth", (cmd: DC.CommandInvocation) => {
+			console.log("Authorization closure works");
+		});
+	});
+
+	// Use a module for authorization
+	registrar.authorize(new AuthModule(), (registrar: DC.Registrar) => {
+		registrar.register("authmod", (cmd: DC.CommandInvocation) => {
+			console.log("Authorization Module works!");
+		});
 	});
 });

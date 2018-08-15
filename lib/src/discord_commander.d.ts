@@ -1,41 +1,56 @@
 import { Client, Message } from "discord.js";
-import CommandManager from "./command_manager";
-import { IEventMap } from "./common";
-declare class DiscordCommander extends CommandManager {
+import CommandInvocation from "./command_invocation";
+import * as Common from "./common";
+/**
+ * A Discord bot with a command handler built in
+ */
+declare class DiscordCommander extends Client {
     /**
      * A list of all the events to listen for
      */
-    protected events: IEventMap;
+    protected events: Common.IEventMap;
     /**
-     * Store any active listeners
+     * Store all registered commands
      */
-    protected eventListeners: IEventMap;
+    __commands: Common.ICommandMap;
     /**
-     * An instance of the Discord bot client
+     * The prefix for commands
      */
-    private __bot;
+    __prefix: string;
     /**
      * Create a new DiscordCommander
      */
-    constructor(bot?: Client);
+    constructor();
     /**
      * Register the event listeners
      */
     protected registerListeners(): void;
     /**
-     * Unregister the event listeners
+     * Check if a command is defined
      */
-    protected unregisterListeners(): void;
+    has(name: string): boolean;
+    /**
+     * Invoke a command with the given arguments
+     */
+    invoke(invocation: CommandInvocation): void;
+    /**
+     * Register some new commands
+     */
+    register(callback: Common.RegistrationCallback, context?: any): void;
+    /**
+     * Handle a command message
+     */
+    protected handle(message: Message): void;
     /**
      * Invoked when a message is received from Discord
      */
     protected onMessage(message: Message): void;
     /**
-     * Get the current Discord bot client instance
+     * Get the command prefix
      */
     /**
-    * Set the current Discord bot client instance
+    * Set the command prefix
     */
-    bot: Client | undefined;
+    prefix: string;
 }
 export default DiscordCommander;

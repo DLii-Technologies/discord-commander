@@ -1,4 +1,5 @@
-import { GuildMember, Message } from "discord.js";
+import { Message }   from "discord.js";
+import { CommandInvocationError } from "./error";
 
 class CommandInvocation
 {
@@ -13,11 +14,6 @@ class CommandInvocation
 	private __commandString: string;
 
 	/**
-	 * The validity of the command state
-	 */
-	private __isValid: boolean = true;
-
-	/**
 	 * The name of the command invoked
 	 */
 	private __name: string = "";
@@ -25,14 +21,14 @@ class CommandInvocation
 	/**
 	 * The member who created the invocation
 	 */
-	private __member: GuildMember;
+	private __message: Message;
 
 	/**
 	 * Create a new command instance
 	 */
 	constructor (prefix: string, message: Message) {
 		this.__commandString = message.content.trim();
-		this.__member        = message.member;
+		this.__message       = message;
 		this.evaluate(prefix);
 	}
 
@@ -42,19 +38,41 @@ class CommandInvocation
 	protected evaluate (prefix: string) {
 		var command: string = this.__commandString.split(" ")[0];
 		if (command.startsWith(prefix) && command.length > prefix.length) {
-			var name: string = command.substr(prefix.length);
 			this.__name      = command.substr(prefix.length);
 			this.__argString = this.__commandString.substr(command.length).trim();
 		} else {
-			this.__isValid = false;
+			throw new CommandInvocationError("Command evaluation error");
 		}
 	}
+
+	// Public Methods ------------------------------------------------------------------------------
+
+	/**
+	 * Check if the user has the given role(s)
+	 */
+	public hasRole (...roles: string[]) {
+		for (var i in roles) {
+			if (!this.__message.member.roles.has(roles[i])) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	// Properties ----------------------------------------------------------------------------------
 
 	/**
 	 * Get the argument string
 	 */
 	public get argString () {
 		return this.__argString;
+	}
+
+	/**
+	 * Get the channel where the invocation was requested
+	 */
+	public get channel () {
+		return this.__message.channel;
 	}
 
 	/**
@@ -65,17 +83,31 @@ class CommandInvocation
 	}
 
 	/**
-	 * Check if the command is in a valid state
+	 * Get the name of the command
 	 */
-	public get isValid () {
-		return this.__isValid;
+	public get command () {
+		return this.__name;
 	}
 
 	/**
-	 * Get the name of the command
+	 * Get the raw Discord Message object
 	 */
-	public get name () {
-		return this.__name;
+	public get rawMessage () {
+		return this.__message;
+	}
+
+	/**
+	 * Get the roles the user has
+	 */
+	public get roles () {
+		return this.__message.member.roles;
+	}
+
+	/**
+	 * Get the user ID
+	 */
+	public get user () {
+		return this.__message.member;
 	}
 }
 

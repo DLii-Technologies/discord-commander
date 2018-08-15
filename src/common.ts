@@ -1,8 +1,14 @@
 import Command           from "./command";
 import CommandInvocation from "./command_invocation";
-import CommandRegistrar  from "./command_registrar";
+import Registrar         from "./registrar";
+import Authorization     from "./authorization";
 
 // Types -------------------------------------------------------------------------------------------
+
+/**
+ * The function signature for a command authorization callback
+ */
+export type AuthorizationCallback = (invocation: CommandInvocation) => boolean;
 
 /**
  * The function signature for command callback functions
@@ -12,7 +18,7 @@ export type CommandCallback = (command: CommandInvocation) => void;
 /**
  * The function signature for a command registration callback
  */
-export type RegistrationCallback = (registrar: CommandRegistrar) => void;
+export type RegistrationCallback = (registrar: Registrar) => void;
 
 // Interfaces --------------------------------------------------------------------------------------
 
@@ -38,7 +44,7 @@ export interface ICommandRegistrar {
 	/**
 	 * Register some commands
 	 */
-	register (registrar: CommandRegistrar): void;
+	register (registrar: Registrar): void;
 };
 
 /**

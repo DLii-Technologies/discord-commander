@@ -1,57 +1,72 @@
 import CommandInvocation   from "./command_invocation";
+import Authorization       from "./authorization";
 import { CommandCallback } from "./common";
 
 class Command
 {
 	/**
+	 * Authorization models
+	 */
+	private __authorization: Authorization[] = [];
+
+	/**
 	 * The callback function/method
 	 */
-	__callback: CommandCallback | undefined;
+	private __run: CommandCallback;
 
 	/**
 	 * The context of the callback
 	 */
-	__context: any;
+	private __context: any;
 
 	/**
 	 * The name of the command
 	 */
-	__name: string;
+	private __name: string;
 
 	/**
 	 * Create a new command
 	 */
-	constructor (name: string, callback: CommandCallback | undefined, context?: any) {
-		this.__name     = name;
-		this.__callback = callback;
-		this.__context  = context || callback;
+	constructor (name: string, auth: Authorization[], callback: CommandCallback | undefined,
+				 context?: any)
+	{
+		this.__authorization = auth.slice();
+		this.__name          = name;
+		this.__run           = callback || this.run;
+		this.__context       = callback ? (context  || callback) : this;
 	}
 
 	// Overridable ---------------------------------------------------------------------------------
 
 	/**
-	 * Determine if the command invocation is authorized
+	 * Run the command
 	 */
-	public authorize (invocation: CommandInvocation): boolean {
-		return true;
+	public run (invocation: CommandInvocation) {
+		//
 	}
 
 	// Public Methods ------------------------------------------------------------------------------
 
 	/**
-	 * Invoke the command
+	 * Authorize the invocation
 	 */
-	public invoke (invocation: CommandInvocation): boolean {
-		if (this.__callback)
-			return this.__callback.apply(invocation, this.__context);
+	protected authorize (invocation: CommandInvocation) {
+		if (this.__authorization.length > 0) {
+			for (var i in this.__authorization) {
+				if (!this.__authorization[i].isAuthorized(invocation)) {
+					return false;
+				}
+			}
+		}
 		return true;
 	}
 
 	/**
-	 * Check if the command invocation is authorized
+	 * Invoke the command
 	 */
-	public isAuthorized (invocation: CommandInvocation) {
-
+	public invoke (invocation: CommandInvocation) {
+		if (this.authorize(invocation))
+			return this.__run.apply(invocation);
 	}
 }
 
