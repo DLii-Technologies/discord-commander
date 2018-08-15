@@ -1,3 +1,11 @@
+/**
+ * This is not a proper unit test.
+ *
+ * Since this module realies almost entirely on external interactions, I'm not exactly sure how to
+ * set up the tests properly. For now, you set up your Discord bot's client ID in the `.env` file,
+ * boot it up, and test out the list of registered commands. Test impromevent is greatly welcome!
+ */
+
 import * as DC    from "../";
 import { config } from "dotenv";
 import { expect } from "chai";
