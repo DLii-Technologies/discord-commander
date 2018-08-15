@@ -2,8 +2,8 @@
   "name": "discord-commander",
   "version": "0.1.0",
   "description": "A Discord bot written in NodeJS that is designed to receive and handle commands via Discord messages",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "directories": {
     "doc": "doc",
     "example": "example",

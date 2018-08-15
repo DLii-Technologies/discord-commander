@@ -40,7 +40,7 @@ describe("Client ID", () => {
 /**
  * Create a new bot instance
  */
-var bot = new DC.DiscordCommander();
+var bot = new DC.Bot();
 
 /**
  * Boot up the bot

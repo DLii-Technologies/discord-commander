@@ -4,7 +4,7 @@ import * as Common from "./common";
 /**
  * A Discord bot with a command handler built in
  */
-declare class DiscordCommander extends Client {
+declare class Bot extends Client {
     /**
      * A list of all the events to listen for
      */
@@ -53,4 +53,4 @@ declare class DiscordCommander extends Client {
     */
     prefix: string;
 }
-export default DiscordCommander;
+export default Bot;
