@@ -4,11 +4,11 @@ A lightweight Discord bot framework designed to receive and handle commands via 
 
 ## Table of Contents
 
-- Example
+- [Example](#example)
 - [Command Registration](#command-registration)
     - [Callback Functions](#callback-functions)
     - [Multiple Callback Functions](#multiple-callback-functions)
-    - [Command Module Registrar](#command-module-registrar)
+    - [Command Module Registrar](#command-module-registration)
 
 ## Example
 
@@ -33,7 +33,7 @@ client.register((registrar) => {
 });
 ```
 
-If we now run `!mycommand` in a Discord text channel that the bot can access, we'll get `My command has been executed!` in our console!
+If we now send `!mycommand` in a Discord text channel that the bot can access, we'll get `My command has been executed!` in our console!
 
 ## Command Registration
 
