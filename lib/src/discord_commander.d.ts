@@ -1,37 +1,56 @@
 import { Client, Message } from "discord.js";
-import CommandRegistrar from "./command_registrar";
+import CommandInvocation from "./command_invocation";
+import * as Common from "./common";
+/**
+ * A Discord bot with a command handler built in
+ */
 declare class DiscordCommander extends Client {
     /**
-     * The command prefix
+     * A list of all the events to listen for
      */
-    commandPrefix: string;
+    protected events: Common.IEventMap;
     /**
-     * The Registrar stores each of the registered command modules
+     * Store all registered commands
      */
-    private __registrar;
+    __commands: Common.ICommandMap;
     /**
-     * The client ID for the Discord bot
+     * The prefix for commands
      */
-    private __clientId;
+    __prefix: string;
     /**
-     * Create a new DiscordCommander Discord bot
+     * Create a new DiscordCommander
      */
-    constructor(clientId: string);
+    constructor();
     /**
      * Register the event listeners
      */
     protected registerListeners(): void;
     /**
-     * Start the bot
+     * Check if a command is defined
      */
-    boot(): void;
+    has(name: string): boolean;
+    /**
+     * Invoke a command with the given arguments
+     */
+    invoke(invocation: CommandInvocation): void;
+    /**
+     * Register some new commands
+     */
+    register(callback: Common.RegistrationCallback, context?: any): void;
+    /**
+     * Handle a command message
+     */
+    protected handle(message: Message): void;
     /**
      * Invoked when a message is received from Discord
      */
     protected onMessage(message: Message): void;
     /**
-     * Get the command registrar
+     * Get the command prefix
      */
-    readonly commandRegistrar: CommandRegistrar;
+    /**
+    * Set the command prefix
+    */
+    prefix: string;
 }
 export default DiscordCommander;

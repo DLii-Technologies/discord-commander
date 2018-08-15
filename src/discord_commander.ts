@@ -1,72 +1,117 @@
-import { Client, Message } from "discord.js";
-import Command             from "./command";
-import CommandRegistrar    from "./command_registrar";
+import { Client, Message }        from "discord.js";
+import CommandInvocation          from "./command_invocation";
+import Registrar                  from "./registrar";
+import { CommandInvocationError } from "./error";
+import * as Common                from "./common";
 
+/**
+ * A Discord bot with a command handler built in
+ */
 class DiscordCommander extends Client
 {
 	/**
-	 * The command prefix
+	 * A list of all the events to listen for
 	 */
-	public commandPrefix = '!';
+	protected events: Common.IEventMap = {
+		message: this.onMessage
+	};
 
 	/**
-	 * The Registrar stores each of the registered command modules
+	 * Store all registered commands
 	 */
-	private __registrar: CommandRegistrar;
+	__commands: Common.ICommandMap = {};
 
 	/**
-	 * The client ID for the Discord bot
+	 * The prefix for commands
 	 */
-	private __clientId: string;
+	__prefix = '!';
 
 	/**
-	 * Create a new DiscordCommander Discord bot
+	 * Create a new DiscordCommander
 	 */
-	public constructor (clientId: string){
+	public constructor () {
 		super();
-		this.__clientId  = clientId;
-		this.__registrar = new CommandRegistrar();
+		this.registerListeners();
 	}
 
 	/**
 	 * Register the event listeners
 	 */
 	protected registerListeners () {
-		this.on("message", this.onMessage);
+		for (var event in this.events) {
+			this.on(event, (...args: any[]) => {
+				this.events[event].apply(this, args);
+			});
+		}
+	}
+
+	// Public Methods ------------------------------------------------------------------------------
+
+	/**
+	 * Check if a command is defined
+	 */
+	public has (name: string) {
+		return Boolean(this.__commands[name]);
 	}
 
 	/**
-	 * Start the bot
+	 * Invoke a command with the given arguments
 	 */
-	public boot () {
-		this.registerListeners();
-		this.login(this.__clientId);
+	public invoke (invocation: CommandInvocation) {
+		if (this.has(invocation.command)) {
+			this.__commands[invocation.command].invoke(invocation);
+		}
+	}
+
+	/**
+	 * Register some new commands
+	 */
+	public register (callback: Common.RegistrationCallback, context?: any) {
+		callback(new Registrar(this.__commands, context));
 	}
 
 	// Event Handlers ------------------------------------------------------------------------------
 
 	/**
+	 * Handle a command message
+	 */
+	protected handle (message: Message) {
+		var invocation = new CommandInvocation(this.prefix, message);
+		this.invoke(invocation);
+	}
+
+	/**
 	 * Invoked when a message is received from Discord
 	 */
 	protected onMessage (message: Message) {
-		var name: string = message.content.split(' ')[0];
-		if (name.startsWith(this.commandPrefix) && name.length > this.commandPrefix.length) {
-			// Shave off the prefix
-			if (this.__registrar.has(name.substr(this.commandPrefix.length))) {
-				this.__registrar.invoke(
-					new Command(message.content.substr(this.commandPrefix.length))
-				);
+		if (message.content.startsWith(this.prefix)) {
+			try {
+				this.handle(message);
+			} catch (e) {
+				if (e !instanceof CommandInvocationError) {
+					console.error(e);
+				}
 			}
 		}
 	}
 
-	// Accessors -----------------------------------------------------------------------------------
+	// Properties ----------------------------------------------------------------------------------
 
 	/**
-	 * Get the command registrar
+	 * Get the command prefix
 	 */
-	get commandRegistrar () {
-		return this.__registrar;
+	public get prefix () {
+		return this.__prefix;
+	}
+
+	/**
+	 * Set the command prefix
+	 */
+	public set prefix (prefix: string) {
+		prefix = prefix.trim();
+		if (prefix.length == 0)
+			throw new Error("Set Command Prefix Error: Prefix cannot be empty");
+		this.__prefix = prefix;
 	}
 }
 

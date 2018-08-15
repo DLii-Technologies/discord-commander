@@ -1,23 +1,38 @@
+import CommandInvocation from "./command_invocation";
+import Authorization from "./authorization";
+import { CommandCallback } from "./common";
 declare class Command {
+    /**
+     * Authorization models
+     */
+    private __authorization;
+    /**
+     * The callback function/method
+     */
+    private __run;
+    /**
+     * The context of the callback
+     */
+    private __context;
     /**
      * The name of the command
      */
     private __name;
     /**
-     * The original command string
-     */
-    private __cmdString;
-    /**
      * Create a new command
      */
-    constructor(command: string);
+    constructor(name: string, auth: Authorization[], callback: CommandCallback | undefined, context?: any);
     /**
-     * Set the name given the command string
+     * Run the command
      */
-    protected initName(cmdString: string): void;
+    run(invocation: CommandInvocation): void;
     /**
-     * Get the name of the command
+     * Authorize the invocation
      */
-    readonly name: string;
+    protected authorize(invocation: CommandInvocation): boolean;
+    /**
+     * Invoke the command
+     */
+    invoke(invocation: CommandInvocation): any;
 }
 export default Command;
