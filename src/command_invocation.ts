@@ -92,7 +92,7 @@ class CommandInvocation
 	/**
 	 * Get the raw Discord Message object
 	 */
-	public get rawMessage () {
+	public get message () {
 		return this.__message;
 	}
 
