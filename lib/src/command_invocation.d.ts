@@ -1,5 +1,5 @@
-/// <reference path="../../node_modules/discord.js/typings/index.d.ts" />
 import { Message } from "discord.js";
+
 declare class CommandInvocation {
     /**
      * Store the raw argument string
