@@ -48,7 +48,7 @@ declare class CommandInvocation {
     /**
      * Get the raw Discord Message object
      */
-    readonly rawMessage: Message;
+    readonly message: Message;
     /**
      * Get the roles the user has
      */
