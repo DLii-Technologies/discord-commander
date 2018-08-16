@@ -1,12 +1,12 @@
-import { Common, Registrar } from "../";
+import { Common, Registrar, CommandInvocation } from "../";
 
 class TestCommandModule implements Common.ICommandRegistrar
 {
 	public testModVar = false;
 
-	testMod () {
+	testMod (invocation: CommandInvocation) {
 		this.testModVar = true;
-		console.log("Test module ran!");
+		invocation.message.reply("Test module ran!");
 	}
 
 	register (registrar: Registrar) {

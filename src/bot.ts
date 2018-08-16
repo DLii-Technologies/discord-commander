@@ -88,9 +88,7 @@ class Bot extends Client
 			try {
 				this.handle(message);
 			} catch (e) {
-				if (e !instanceof CommandInvocationError) {
-					console.error(e);
-				}
+				console.error(e);
 			}
 		}
 	}

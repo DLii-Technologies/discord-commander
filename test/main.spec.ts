@@ -62,8 +62,8 @@ describe("Bot Bootup", () => {
 bot.register((registrar: DC.Registrar) => {
 
 	// Standard callback function registration
-	registrar.register("test", (command: DC.CommandInvocation) => {
-		console.log("It works!");
+	registrar.register("test", (invocation: DC.CommandInvocation) => {
+		invocation.message.reply("Test works!");
 	});
 
 	// Command Module registration
@@ -71,8 +71,8 @@ bot.register((registrar: DC.Registrar) => {
 
 	// Register commands using a CommandDefinition map
 	registrar.register({
-		"testmulti": (cmd: DC.CommandInvocation) => {
-			console.log("Test Multi");
+		"testmulti": (invocation: DC.CommandInvocation) => {
+			invocation.message.reply("Test multi");
 		}
 	});
 
@@ -80,15 +80,15 @@ bot.register((registrar: DC.Registrar) => {
 	registrar.authorize((invocation: DC.CommandInvocation) => {
 		return invocation.hasRole("479049390586331156");
 	}, (registrar: DC.Registrar) => {
-		registrar.register("auth", (cmd: DC.CommandInvocation) => {
-			console.log("Authorization closure works");
+		registrar.register("auth", (invocation: DC.CommandInvocation) => {
+			invocation.message.reply("Auth test");
 		});
 	});
 
 	// Use a module for authorization
 	registrar.authorize(new AuthModule(), (registrar: DC.Registrar) => {
-		registrar.register("authmod", (cmd: DC.CommandInvocation) => {
-			console.log("Authorization Module works!");
+		registrar.register("authmod", (invocation: DC.CommandInvocation) => {
+			invocation.message.reply("Auth mod test");
 		});
 	});
 });

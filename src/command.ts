@@ -65,8 +65,9 @@ class Command
 	 * Invoke the command
 	 */
 	public invoke (invocation: CommandInvocation) {
-		if (this.authorize(invocation))
-			return this.__run.apply(invocation);
+		if (this.authorize(invocation)) {
+			return this.__run.apply(this.__context, [invocation]);
+		}
 	}
 }
 
